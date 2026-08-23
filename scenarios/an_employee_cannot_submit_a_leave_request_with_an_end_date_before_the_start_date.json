@@ -1,0 +1,41 @@
+[
+  {
+    "test_name": "Successful submission of leave request with valid dates",
+    "type": "positive",
+    "preconditions": "The employee is logged in and on the leave request submission page",
+    "steps": [
+      "Select a start date (e.g., Today's Date + 2)",
+      "Select an end date (e.g., Today's Date + 5)",
+      "Enter the reason for leave",
+      "Click the Submit button"
+    ],
+    "expected_result": "The leave request is successfully submitted and moves to the 'Pending Approval' state, and a confirmation message is displayed.",
+    "priority": "high"
+  },
+  {
+    "test_name": "Submission fails when end date is before start date",
+    "type": "negative",
+    "preconditions": "The employee is logged in and on the leave request submission page",
+    "steps": [
+      "Select a start date (e.g., 2024-10-10)",
+      "Select an end date (e.g., 2024-10-08)",
+      "Enter the reason for leave",
+      "Click the Submit button"
+    ],
+    "expected_result": "A client-side validation error message must appear immediately below the end date field, stating that the end date cannot be before the start date. The request must not be submitted.",
+    "priority": "high"
+  },
+  {
+    "test_name": "Submission fails when start and end dates are the same",
+    "type": "positive",
+    "preconditions": "The employee is logged in and on the leave request submission page",
+    "steps": [
+      "Select a start date (e.g., Today's Date)",
+      "Select an end date (e.g., Today's Date)",
+      "Enter the reason for leave",
+      "Click the Submit button"
+    ],
+    "expected_result": "The leave request is successfully submitted, as a single-day leave is valid. A confirmation message is displayed.",
+    "priority": "medium"
+  }
+]
