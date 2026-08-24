@@ -69,7 +69,8 @@ class BasePage:
 
     @property
     def no_records_message(self):
-        return self.page.get_by_text("No Records Found")
+        """Empty-state text. Rendered both in the results banner and as a toast."""
+        return self.page.get_by_text("No Records Found").first
 
     def record_count(self) -> int:
         """Read the "(N) Records Found" banner, or 0 when the table is empty."""
@@ -85,7 +86,18 @@ class BasePage:
         return [text.strip() for text in cells.all_text_contents()]
 
     def search(self):
-        self.search_button.click()
+        """Submit the filter form and wait for the refreshed results.
+
+        The results banner keeps its previous value until the query comes back, so
+        settling on ``networkidle`` alone would read a stale count. Waiting on the
+        REST response ties the wait to the query that was actually issued.
+        """
+        with self.page.expect_response(
+            lambda response: "/api/v2/" in response.url
+            and response.request.method == "GET",
+            timeout=30_000,
+        ):
+            self.search_button.click()
         self.page.wait_for_load_state("networkidle")
         return self
 

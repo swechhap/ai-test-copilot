@@ -61,14 +61,31 @@ class EmployeeListPage(BasePage):
         return self.page.locator(".oxd-autocomplete-option")
 
     @property
+    def settled_autocomplete_option(self):
+        """First hint once the dropdown stops showing its "Searching...." placeholder.
+
+        Clicking the placeholder silently selects nothing, which turns a targeted
+        search into an unfiltered one, so every lookup has to wait it out.
+        """
+        return self.autocomplete_options.filter(has_not_text="Searching....").first
+
+    @property
     def confirm_delete_button(self):
         return self.page.locator(".oxd-dialog-sheet").get_by_role("button", name="Yes, Delete")
 
+    def pick_employee_hint(self, name: str) -> bool:
+        """Choose ``name`` from the autocomplete. False when it matches nobody."""
+        self.employee_name.fill(name)
+        option = self.settled_autocomplete_option
+        option.wait_for(timeout=15_000)
+        if "No Records Found" in option.inner_text():
+            return False
+        option.click()
+        return True
+
     def search_by_name(self, name: str):
         """Type into the employee-name autocomplete, pick the hint, then search."""
-        self.employee_name.fill(name)
-        self.autocomplete_options.first.wait_for(timeout=15_000)
-        self.autocomplete_options.first.click()
+        self.pick_employee_hint(name)
         return self.search()
 
     def search_by_id(self, employee_id: str):
@@ -90,20 +107,18 @@ class EmployeeListPage(BasePage):
     def delete_if_present(self, name: str) -> bool:
         """Delete the employee matching ``name``, returning False if already gone.
 
-        Used for teardown, so it has to stay quiet when the test under it already
-        removed the record.
+        Used for teardown, so it stays quiet when the test under it already removed
+        the record. This runs against a shared demo instance, so it refuses to act
+        unless the search narrowed to exactly the record it went looking for.
         """
         self.open()
-        self.employee_name.fill(name)
         try:
-            self.autocomplete_options.first.wait_for(timeout=15_000)
+            if not self.pick_employee_hint(name):
+                return False
         except PlaywrightTimeoutError:
             return False
-        if "No Records Found" in self.autocomplete_options.first.inner_text():
-            return False
-        self.autocomplete_options.first.click()
         self.search()
-        if not self.rows.count():
+        if self.rows.count() != 1 or self.row_values()[FIRST_NAME] != name:
             return False
         self.delete_row()
         return True
