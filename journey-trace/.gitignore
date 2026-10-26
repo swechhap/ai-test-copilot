@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.log
+
+# Run traces are ephemeral evidence for the current CI run — not committed.
+.journey-trace/runs/
+
+# Golden traces ARE committed — this is the one line that matters:
+# do NOT add .journey-trace/golden/ here.

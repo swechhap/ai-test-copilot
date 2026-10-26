@@ -1,14 +1,34 @@
 # AI Test Copilot
 
-A learning project in two parts:
+This repo's actual product is **[journey-trace](./journey-trace)** — deterministic,
+git-native golden-trace testing for Playwright UAT journeys, with an MCP server so an
+AI agent can reason about *why* a journey changed, without ever running or paying for
+an LLM itself.
+
+- **Using it / what it does for a tester** → [`journey-trace/README.md`](./journey-trace/README.md)
+- **Why it's built this way — the market gaps, the design decisions, the ideas we
+  deliberately rejected** → [`journey-trace/docs/VISION.md`](./journey-trace/docs/VISION.md)
+- **Trace file format spec** → [`journey-trace/docs/TRACE_FORMAT.md`](./journey-trace/docs/TRACE_FORMAT.md)
+
+## What else is in this repo
+
+Everything at this root level (`pages/`, `tests/`, `generate_scenarios.py`, etc.) is
+the **prototyping phase** that led to journey-trace — kept here as a record of the
+exploration, not as a second product:
 
 1. **Phase 1** — a Playwright + pytest UI test suite (Page Object Model) against the
-   [OrangeHRM demo site](https://opensource-demo.orangehrmlive.com).
+   [OrangeHRM demo site](https://opensource-demo.orangehrmlive.com). Proof that a
+   straightforward Playwright suite behaves predictably against a real multi-page
+   app — the assumptions journey-trace's trace capture is built on.
 2. **Phase 2** — an LLM-powered script that turns a plain-English requirement into
-   structured QA test scenarios (JSON).
+   structured QA test scenarios (JSON). Early exploration of where an LLM actually
+   adds value in a test workflow — it directly informed the decision to keep
+   journey-trace's core (`diffTraces`, trace capture) **fully deterministic and
+   LLM-free**, and push all AI reasoning out to the MCP layer instead of baking a
+   generator or classifier into the product.
 
-The long-term goal is to connect the two: generate scenarios with an LLM, then have
-them turned into runnable Playwright tests.
+Both phases are complete and are not under active development. Instructions below
+are kept so the prototype remains runnable for reference.
 
 ## Project structure
 
@@ -30,6 +50,10 @@ tests/                    # the Phase 1 test suite
 hello_llm.py               # Phase 2 step 1: smallest possible LLM call
 generate_scenarios.py      # Phase 2 step 2: requirement -> JSON test scenarios
 scenarios/                  # generated output, one JSON file per requirement
+
+journey-trace/             # the actual product — see journey-trace/README.md
+reports/                    # market research reports behind journey-trace's design
+research_notes/             # raw research notes behind those reports
 ```
 
 ## Prerequisites
@@ -153,8 +177,12 @@ case, one-step test cases). Switching to a larger model (`gemma4`) fixed content
 quality immediately — a parser alone won't catch this class of failure, so the
 generated output is still worth a human skim.
 
-## Roadmap
+## Where this led
 
-- Turn generated scenarios into runnable Playwright tests.
-- Expand scenario generation to cover more of the OrangeHRM modules already
-  under test in Phase 1 (login, employee, leave).
+These two phases validated two separate things that directly shaped journey-trace:
+that a deterministic Playwright suite is a reliable foundation to build trace
+capture on, and that LLMs are genuinely useful for *generation* but unreliable
+enough (even on well-prompted, well-validated output) that journey-trace's actual
+product keeps its core deterministic and leaves all AI judgment calls to a
+human-approved MCP layer. See [`journey-trace/docs/VISION.md`](./journey-trace/docs/VISION.md)
+for the full reasoning.

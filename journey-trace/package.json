@@ -1,0 +1,47 @@
+{
+  "name": "journey-trace",
+  "version": "0.1.0",
+  "description": "Deterministic, git-native golden-trace testing for Playwright user journeys, with an MCP server for AI-assisted root-cause triage.",
+  "type": "module",
+  "bin": {
+    "journey-trace": "./bin/journey-trace.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "bin",
+    "templates"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/cli/index.ts",
+    "test": "echo \"no tests yet\" && exit 0"
+  },
+  "keywords": [
+    "playwright",
+    "testing",
+    "uat",
+    "golden-trace",
+    "snapshot-testing",
+    "mcp",
+    "e2e"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "@playwright/test": ">=1.40.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "commander": "^12.1.0",
+    "yaml": "^2.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

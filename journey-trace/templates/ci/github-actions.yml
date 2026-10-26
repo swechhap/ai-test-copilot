@@ -1,0 +1,34 @@
+# Scaffolded by `journey-trace init`. Fill in how your pipeline already
+# gets a URL for the environment you want verified (preview deploy, staging,
+# UAT) — journey-trace only needs that URL, nothing else.
+#
+# Per the product's trigger model: this should run whenever a build is
+# promoted to your UAT/pre-prod environment, not on every PR commit.
+# Adjust the `on:` block below to match how that happens in your pipeline
+# (a deployment webhook, a scheduled nightly build, a manual dispatch tied
+# to your release process, etc.) — there is no one-size-fits-all trigger,
+# because every org's release cadence differs.
+
+name: journey-trace
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "URL of the environment to verify (e.g. your UAT environment)"
+        required: true
+
+jobs:
+  verify-journeys:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npx journey-trace run --base-url "${{ inputs.base_url }}"
+      # Non-zero exit = at least one journey diverged from its golden trace.
+      # Wire this job's result into whatever gates your release-to-customer
+      # step (a required status check, a release-manager approval, etc.).
