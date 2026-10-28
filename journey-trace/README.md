@@ -142,9 +142,13 @@ whatever AI agent or human reads the evidence bundle.
 
 ## Status
 
-Phase 1 scaffold — types, CLI shape, and MCP tool contracts are defined;
-implementation bodies are stubbed with `TODO(phase-1)` markers. See each
-file under `src/` for the intended behavior before filling it in.
+Phase 1 scaffold, implementation in progress. Types, CLI shape, and MCP
+tool contracts are defined; config loading and trace normalization
+(`cli/config.ts`, `core/trace/serialize.ts`) are implemented; everything
+else is still stubbed with `TODO(phase-1)` markers — nothing is end-to-end
+runnable yet. See [`CHANGELOG.md`](./CHANGELOG.md) for a dated log of what
+changed and why, and each file under `src/` for intended behavior before
+filling it in.
 
 ## License
 

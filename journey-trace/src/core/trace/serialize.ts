@@ -8,11 +8,33 @@ import type { GoldenTrace, JourneyTrace, NormalizeRule } from "./types.js";
  * from dynamic data — the single biggest cause of distrust in snapshot
  * testing tools, per the research that led to this design.
  *
- * TODO(phase-1): implement — walk every string field in a JourneyTrace and
- * apply each NormalizeRule in order.
+ * Walks every string value in the trace — steps, aria snapshots, network
+ * entry shapes, finalState, recursively through arrays/objects — and
+ * applies each rule in array order. Rules are plain regex pattern ->
+ * replacement pairs with no knowledge of any particular app; genericness
+ * comes from the fact that this walker never branches on a field's name
+ * or meaning, only its runtime type.
  */
 export function normalizeTrace(trace: JourneyTrace, rules: NormalizeRule[]): JourneyTrace {
-  throw new Error("not implemented: normalizeTrace");
+  return applyNormalizeRules(trace, rules) as JourneyTrace;
+}
+
+function applyNormalizeRules(value: unknown, rules: NormalizeRule[]): unknown {
+  if (typeof value === "string") {
+    return rules.reduce(
+      (acc, rule) => acc.replace(new RegExp(rule.pattern, "g"), rule.replacement),
+      value
+    );
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => applyNormalizeRules(item, rules));
+  }
+  if (value !== null && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, val]) => [key, applyNormalizeRules(val, rules)])
+    );
+  }
+  return value;
 }
 
 /**
